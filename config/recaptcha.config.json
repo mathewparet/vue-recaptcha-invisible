@@ -1,0 +1,5 @@
+{
+   "INSTRUCTIONS": "Update only the SITE KEY in this document. DO NOT put the SITE SECRET in this document as this document will be publically accessible. The enabled tag will help you enable or disable recaptcha in various environments.",
+   "enabled": true,
+   "siteKey": "<set the SITE KEY here. Get your's at https://www.google.com/recaptcha/admin>"
+}
