@@ -1,8 +1,8 @@
 <template>
     <span>
-        <button v-if="this.$recaptcha.enabled"
+        <button v-if="this.$recaptcha.config.enabled"
             :class="'g-recaptcha '+this.className"
-            :data-sitekey=this.$recaptcha.siteKey
+            :data-sitekey=this.$recaptcha.config.siteKey
             :data-callback=this.callback>
             <slot>Submit</slot>
         </button>
@@ -12,30 +12,43 @@
     </span>
 </template>
 <script>
+import Vue from 'Vue';
+
+const defaultOptions = {
+    enabled: true,
+    siteKey: '',
+    url: '/recaptcha.config.json',
+}
+
 export default {
-    install(Vue, options)
+    install(Vue, opts)
     {
+        const options = { ...defaultOptions, ...opts };
+
+        const root = new Vue({
+            data: {
+                config: options,
+                render: createElement => createElement(this)
+            }
+        });
+
+        Vue.prototype.$recaptcha = root;
+
         Vue.component('recaptcha', this);
         
-        Vue.prototype.$recaptcha = {};
-
-        Vue.prototype.$recaptcha.enabled = options && options.enabled ? options.enabled : true;
-        Vue.prototype.$recaptcha.siteKey = options && options.siteKey ? options.siteKey : null;
-
         if((options && !options.siteKey) || !options)
-        { 
-            let url = options && options.url ? options.url : '/recaptcha.config.json'
-            axios.get(url)
+        {
+            axios.get(options.url)
                 .then(options => {
-                    Vue.prototype.$recaptcha = options.data;
                     if(!options.data.siteKey)
-                        throw `siteKey not found in Recaptcha config file - ${url}`;
+                        throw `siteKey not found in Recaptcha config file - ${options.url}`;
+                    Vue.prototype.$recaptcha.config = options.data;
                 })
                 .catch(error => {
-                    if(error == `siteKey not found in Recaptcha config file - ${url}`)
+                    if(error == `siteKey not found in Recaptcha config file - ${options.url}`)
                         throw error;
                     else
-                        throw `An error occured while trying to load Reacptcha config file - ${url}. Please find more details at https://www.npmjs.com/package/@mathewparet/vue-recaptcha-invisible#configuration. ${error}`;
+                        throw `An error occured while trying to load Reacptcha config file - ${options.url}. Please find more details at https://www.npmjs.com/package/@mathewparet/vue-recaptcha-invisible#configuration. ${error}`;
                 });
         }
     },
@@ -71,12 +84,8 @@ export default {
     },
     mounted() {
         this.formId = $(this.$el).closest('form')[0].id;
-        if(this.$recaptcha.enabled)
-        {
-            this.loadRecaptcha(); // load the recaptcha script
-            
-            this.defineCallback(); // define the window callback function
-        }
+        this.loadRecaptcha(); // load the recaptcha script
+        this.defineCallback(); // define the window callback function
     }
 }
 </script>

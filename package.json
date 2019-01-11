@@ -1,7 +1,7 @@
 {
   "name": "@mathewparet/vue-recaptcha-invisible",
   "description": "A Vue.JS component for invisible recaptcha that falls back to native button if recaptcha is disabled in config, making it easy to have different settings for different environments.",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": "Mathew Paret <mathewparet@gmail.com>",
   "license": "MIT",
   "dependencies": {
